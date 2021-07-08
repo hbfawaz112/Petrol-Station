@@ -1,0 +1,10 @@
+meter::after {
+  content: attr(data-value);
+
+  position: relative;
+padding-left: 40%;
+  top: -2.2em;
+  color: #0A246A;
+}
+
+

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="odometer-master/themes/odometer-theme-train-station.css" />
+<style>
+    .odometer {
+        font-size: 300% ;
+    }
+</style>
+<script>
+window.odometerOptions = {
+  format: '(ddd).dd'
+};
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="odometer-master/odometer.js"></script>
+<div class="odometer"></div>
+<script>
+
+    let s=window.location.search;
+    let urlParams=new URLSearchParams(s);
+    let v=urlParams.get('v');
+  setTimeout(function(){
+    $('.odometer').html(v);
+  }, 1000);
+</script>
