@@ -1,6 +1,23 @@
 # Petrol-Station
 Management system for a petrol station with all details , web version and mobile version(ios and android devices)
 
+# Technologies used
+
+## Web Version
+  - HTML 
+  - CSS
+  - Bootstrap
+  - JQuery
+  - Ajax
+  - PHP
+  - MYSQL
+## Mobile Version
+  - Flutter
+  - Firebase Firestore
+  - Firebase Authentication
+
+
+### Later I will connect both of them (web and mobile) to a same backend service(example on firebase firestore).<hr>
 # Some Screenshots 
 
 ## Mobile Version 
