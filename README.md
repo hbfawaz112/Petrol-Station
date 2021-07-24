@@ -7,6 +7,7 @@ Management system for a petrol station with all details , web version and mobile
   - HTML 
   - CSS
   - Bootstrap
+  - Java Script
   - JQuery
   - Ajax
   - PHP
