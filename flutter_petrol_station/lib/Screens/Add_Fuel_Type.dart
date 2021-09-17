@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_petrol_station/widgets/Drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_petrol_station/widgets/Drawer.dart';
 import 'package:flutter_petrol_station/services/cloud_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'dashboard_firstore.dart';
 
 class AddFuelType extends StatefulWidget {
   static String id = 'Add_Fuel_Types';
@@ -49,7 +51,7 @@ class _AddFuelTypeState extends State<AddFuelType> {
   }
 
   CloudServices cloudServices =
-  CloudServices(FirebaseFirestore.instance, FirebaseAuth.instance);
+      CloudServices(FirebaseFirestore.instance, FirebaseAuth.instance);
 
   void add_fuel_type_fct() async {
     if (t1.text == '' || t2.text == '' || t3.text == '') {
@@ -96,14 +98,14 @@ class _AddFuelTypeState extends State<AddFuelType> {
           .orderBy('Fuel_Type_Id', descending: true)
           .get()
           .then((val) => {
-        if (val.docs.length > 0)
-          {
-            last_fuel_type_id = val.docs[0].get("Fuel_Type_Id"),
-            print('last id is  : ${last_fuel_type_id}')
-          }
-        else
-          {print("Not Found")}
-      });
+                if (val.docs.length > 0)
+                  {
+                    last_fuel_type_id = val.docs[0].get("Fuel_Type_Id"),
+                    print('last id is  : ${last_fuel_type_id}')
+                  }
+                else
+                  {print("Not Found")}
+              });
       // 2- Get the last price-profit id :
       await FirebaseFirestore.instance
           .collection('Stations')
@@ -112,15 +114,14 @@ class _AddFuelTypeState extends State<AddFuelType> {
           .orderBy('Price_Profit_Id', descending: true)
           .get()
           .then((val) => {
-        if (val.docs.length > 0)
-          {
-            last_price_prfit_id = val.docs[0].get("Price_Profit_Id"),
-            print('last id is  : ${last_price_prfit_id}')
-          }
-        else
-          {print("Not Found")}
-      });
-
+                if (val.docs.length > 0)
+                  {
+                    last_price_prfit_id = val.docs[0].get("Price_Profit_Id"),
+                    print('last id is  : ${last_price_prfit_id}')
+                  }
+                else
+                  {print("Not Found")}
+              });
 
       //get the new fuel_type_id :
       new_fuel_type_id = last_fuel_type_id + 1;
@@ -144,177 +145,183 @@ class _AddFuelTypeState extends State<AddFuelType> {
         'Date': Timestamp.fromDate(DateTime.now()),
         'Fuel_Type_Id': t1.text,
         'Official_Price': int.parse(t2.text),
-        'Official_Profit':int.parse(t3.text),
-
+        'Official_Profit': int.parse(t3.text),
         'Price_Profit_Id': last_price_prfit_id + 1
       });
-      t1.text='';t2.text='';t3.text='';
+      Fluttertoast.showToast(
+        msg: "The new fuel type has been added..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+      t1.text = '';
+      t2.text = '';
+      t3.text = '';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.indigo[50],
-        appBar: AppBar(
-          backgroundColor: Color(0xFF083369),
-          actions: [
-            Row(
-              children: [
-                Icon(
-                  Icons.exit_to_app,
-                  size: 24,
-                  color: Colors.white,
-                ),
-                Text('LOGOUT',
-                    style: TextStyle(color: Colors.white, fontSize: 21.0)),
-                SizedBox(width: 20)
-              ],
-            )
-          ],
-        ),
-        drawer: getDrawer(),
-        body: ListView(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(' Add Fuel Type',
-                  style: TextStyle(
-                    color: Colors.amberAccent,
-                    fontSize: 36,
-                    fontWeight: FontWeight.w500,
-                  )),
-            ),
-            Padding(
+    return WillPopScope(
+      // ignore: missing_return
+      onWillPop: () { 
+        Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Dashboard()),
+  );
+       },
+      child: Scaffold(
+          backgroundColor: Colors.indigo[50],
+          appBar: AppBar(
+            backgroundColor: Color(0xFF083369),
+            
+          ),
+          drawer: getDrawer(),
+          body: ListView(
+            children: [
+              Padding(
                 padding: EdgeInsets.all(12),
-                child: Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Text("Fuel Type",
-                            style:
-                            TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t1,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                                enabledBorder: const OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.black, width: 2.0),
-                                ),
-                                labelText: "Fuel Type",
-                                fillColor: Colors.white,
-                                labelStyle: TextStyle(color: Colors.black45),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.blueAccent, width: 2.0))),
-                            onChanged: (String s) {}),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          fuel_type_error == 1
-                              ? 'You must enter a valid fuel type'
-                              : '',
-                          style: TextStyle(color: Colors.red, fontSize: 21),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text("Official Price ",
-                            style:
-                            TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t2,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                                enabledBorder: const OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.black, width: 2.0),
-                                ),
-                                labelText: "0",
-                                fillColor: Colors.white,
-                                labelStyle: TextStyle(color: Colors.black45),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.blueAccent, width: 2.0))),
-                            onChanged: (String s) {}),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          official_price_error == 1
-                              ? 'You must enter a valid price'
-                              : '',
-                          style: TextStyle(color: Colors.red, fontSize: 21),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text("Profit",
-                            style:
-                            TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t3,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                                enabledBorder: const OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.black, width: 2.0),
-                                ),
-                                labelText: "0",
-                                fillColor: Colors.white,
-                                labelStyle: TextStyle(color: Colors.black45),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.blueAccent, width: 2.0))),
-                            onChanged: (String s) {}),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          profit_error == 1
-                              ? 'You must enter a valid Profit'
-                              : '',
-                          style: TextStyle(color: Colors.red, fontSize: 21),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        ButtonTheme(
-                          height: 50.0,
-                          minWidth: 130,
-                          child: RaisedButton(
-                            color: Colors.indigo[800],
-                            elevation: 12,
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.library_add_check_outlined,
-                                      size: 22, color: Colors.white),
-                                  SizedBox(
-                                    width: 14,
+                child: Text(' Add Fuel Type',
+                    style: TextStyle(
+                      color: Colors.amberAccent,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w500,
+                    )),
+              ),
+              Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Text("Fuel Type",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              controller: t1,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.black, width: 2.0),
                                   ),
-                                  Text('Save',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 25)),
-                                ]),
-                            onPressed: () {
-                              add_fuel_type_fct();
-                            },
+                                  labelText: "Fuel Type",
+                                  fillColor: Colors.white,
+                                  labelStyle: TextStyle(color: Colors.black45),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0))),
+                              onChanged: (String s) {}),
+                          SizedBox(
+                            height: 5,
                           ),
-                        ),
-                      ],
+                          Text(
+                            fuel_type_error == 1
+                                ? 'You must enter a valid fuel type'
+                                : '',
+                            style: TextStyle(color: Colors.red, fontSize: 21),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text("Official Price ",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              controller: t2,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.black, width: 2.0),
+                                  ),
+                                  labelText: "0",
+                                  fillColor: Colors.white,
+                                  labelStyle: TextStyle(color: Colors.black45),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0))),
+                              onChanged: (String s) {}),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            official_price_error == 1
+                                ? 'You must enter a valid price'
+                                : '',
+                            style: TextStyle(color: Colors.red, fontSize: 21),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text("Profit",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              controller: t3,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.black, width: 2.0),
+                                  ),
+                                  labelText: "0",
+                                  fillColor: Colors.white,
+                                  labelStyle: TextStyle(color: Colors.black45),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0))),
+                              onChanged: (String s) {}),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            profit_error == 1
+                                ? 'You must enter a valid Profit'
+                                : '',
+                            style: TextStyle(color: Colors.red, fontSize: 21),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          ButtonTheme(
+                            height: 50.0,
+                            minWidth: 130,
+                            child: RaisedButton(
+                              color: Colors.indigo[800],
+                              elevation: 12,
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.library_add_check_outlined,
+                                        size: 22, color: Colors.white),
+                                    SizedBox(
+                                      width: 14,
+                                    ),
+                                    Text('Save',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 25)),
+                                  ]),
+                              onPressed: () {
+                                add_fuel_type_fct();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ))
-          ],
-        ));
+                  ))
+            ],
+          )),
+    );
   }
 }
