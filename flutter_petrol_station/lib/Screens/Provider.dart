@@ -4,6 +4,9 @@ import 'package:flutter_petrol_station/widgets/Drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_petrol_station/services/cloud_services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'dashboard_firstore.dart';
 
 class Providers extends StatefulWidget {
   static String id = 'Provider';
@@ -89,6 +92,19 @@ class _ProvidersState extends State<Providers> {
       'Provider_Name': t1.text,
       'Provider_Phone': t2.text,
     });
+    setState(() {
+          t1.text='';
+          t2.text='';
+        });
+        Fluttertoast.showToast(
+        msg: "The new provider has been added..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     print('done addedd');
   }
 
@@ -150,332 +166,328 @@ class _ProvidersState extends State<Providers> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.indigo[50],
-        appBar: AppBar(
-          backgroundColor: Color(0xFF083369),
-          actions: [
-            Row(
-              children: [
-                Icon(
-                  Icons.exit_to_app,
-                  size: 24,
-                  color: Colors.white,
-                ),
-                Text('LOGOUT',
-                    style: TextStyle(color: Colors.white, fontSize: 21.0)),
-                SizedBox(width: 20)
-              ],
-            )
-          ],
-        ),
-        drawer: getDrawer(),
-        body: ListView(children: [
-          Card(
-              elevation: 12,
-              child: ExpansionTile(
-                  title: Text("Add Provider",
-                      style:
-                          TextStyle(fontSize: 29, color: Colors.indigo[300])),
-                  trailing: Icon(Icons.arrow_drop_down,
-                      size: 20, color: Colors.indigo[300]),
-                  children: [
-                    Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Column(children: [
-                          SizedBox(height: 20),
-                          Text("Provider Name",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
-                          SizedBox(height: 10),
-                          TextFormField(
-                              controller: t1,
-                              style: TextStyle(color: Colors.black),
-                              decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.blueAccent, width: 2.0),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                labelText: "Provider Name",
-                                fillColor: Colors.white,
-                                labelStyle: TextStyle(color: Colors.black45),
-                              ),
-                              onChanged: (String s) {}),
-                          SizedBox(height: 15),
-                          Text("Provider Phone",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
-                          SizedBox(height: 10),
-                          TextFormField(
-                              controller: t2,
-                              style: TextStyle(color: Colors.black),
-                              decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.blueAccent, width: 2.0),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                labelText: "ex:01111111",
-                                fillColor: Colors.white,
-                                labelStyle: TextStyle(color: Colors.black45),
-                              ),
-                              onChanged: (String s) {}),
-                          SizedBox(height: 15),
-                          ButtonTheme(
-                            height: 50.0,
-                            minWidth: 130,
-                            child: RaisedButton(
-                              color: Colors.indigo[800],
-                              elevation: 12,
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.library_add_check_outlined,
-                                        size: 22, color: Colors.white),
-                                    SizedBox(
-                                      width: 14,
+    return  WillPopScope(
+        // ignore: missing_return
+        onWillPop: () { 
+        Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Dashboard()),
+  );
+       },
+        child: Scaffold(
+            backgroundColor: Colors.indigo[50],
+            appBar: AppBar(
+              backgroundColor: Color(0xFF083369),
+              
+            ),
+            drawer: getDrawer(),
+            body: ListView(children: [
+              Card(
+                  elevation: 12,
+                  child: ExpansionTile(
+                      title: Text("Add Provider",
+                          style:
+                              TextStyle(fontSize: 29, color: Colors.indigo[300])),
+                      trailing: Icon(Icons.arrow_drop_down,
+                          size: 20, color: Colors.indigo[300]),
+                      children: [
+                        Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Column(children: [
+                              SizedBox(height: 20),
+                              Text("Provider Name",
+                                  style: TextStyle(
+                                      fontSize: 21, color: Colors.black45)),
+                              SizedBox(height: 10),
+                              TextFormField(
+                                  controller: t1,
+                                  style: TextStyle(color: Colors.black),
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.blueAccent),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
                                     ),
-                                    Text('Save',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 25)),
-                                  ]),
-                              onPressed: () {
-                                addProvider();
-                              },
-                            ),
-                          ),
-                        ]))
-                  ])),
-          SizedBox(height: 16),
-          Card(
-              elevation: 12,
-              child: ExpansionTile(
-                  title: Text("Provider Info",
-                      style:
-                          TextStyle(fontSize: 29, color: Colors.indigo[300])),
-                  trailing: Icon(Icons.arrow_drop_down,
-                      size: 20, color: Colors.indigo[300]),
-                  children: [
-                    Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Column(children: [
-                          Divider(),
-                          SizedBox(height: 20),
-                          Text("Select Provider",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
-                          SizedBox(height: 10),
-                          StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection('Stations')
-                                  .doc(station)
-                                  .collection('Provider')
-                                  .snapshots(),
-                              builder: (context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                if (!snapshot.hasData)
-                                  Center(
-                                    child: const CupertinoActivityIndicator(),
-                                  );
-
-                                return Container(
-                                    width: 350.0,
-                                    height: 58,
-                                    decoration: ShapeDecoration(
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            width: 1.0,
-                                            style: BorderStyle.solid),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(15.0)),
-                                      ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
                                     ),
-                                    child: DropdownButtonHideUnderline(
-                                      child: DropdownButton<String>(
-                                        isExpanded: true,
-                                        icon: const Icon(Icons.arrow_drop_down),
-                                        iconSize: 24,
-                                        elevation: 16,
-                                        style: const TextStyle(
-                                            color: Colors.deepPurple),
-                                        underline: Container(
-                                          height: 2,
-                                          color: Colors.deepPurpleAccent,
+                                    labelText: "Provider Name",
+                                    fillColor: Colors.white,
+                                    labelStyle: TextStyle(color: Colors.black45),
+                                  ),
+                                  onChanged: (String s) {}),
+                              SizedBox(height: 15),
+                              Text("Provider Phone",
+                                  style: TextStyle(
+                                      fontSize: 21, color: Colors.black45)),
+                              SizedBox(height: 10),
+                              TextFormField(
+                                  controller: t2,
+                                  style: TextStyle(color: Colors.black),
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.blueAccent),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
+                                    ),
+                                    labelText: "ex:01111111",
+                                    fillColor: Colors.white,
+                                    labelStyle: TextStyle(color: Colors.black45),
+                                  ),
+                                  onChanged: (String s) {}),
+                              SizedBox(height: 15),
+                              ButtonTheme(
+                                height: 50.0,
+                                minWidth: 130,
+                                child: RaisedButton(
+                                  color: Colors.indigo[800],
+                                  elevation: 12,
+                                  child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.library_add_check_outlined,
+                                            size: 22, color: Colors.white),
+                                        SizedBox(
+                                          width: 14,
                                         ),
-                                        value: selecting_provider,
-                                        //isDense: true,
-                                        hint: Text('Fuel Type'),
-                                        onChanged: (newValue) {
-                                          Provider_changed(newValue);
-                                        },
-                                        items: snapshot.data != null
-                                            ? snapshot.data.docs.map(
-                                                (DocumentSnapshot document) {
-                                                return new DropdownMenuItem<
-                                                        String>(
-                                                    value: document
-                                                        .get('Provider_Name')
-                                                        .toString(),
+                                        Text('Save',
+                                            style: TextStyle(
+                                                color: Colors.white, fontSize: 25)),
+                                      ]),
+                                  onPressed: () {
+                                    addProvider();
+                                  },
+                                ),
+                              ),
+                            ]))
+                      ])),
+              SizedBox(height: 16),
+              Card(
+                  elevation: 12,
+                  child: ExpansionTile(
+                      title: Text("Provider Info",
+                          style:
+                              TextStyle(fontSize: 29, color: Colors.indigo[300])),
+                      trailing: Icon(Icons.arrow_drop_down,
+                          size: 20, color: Colors.indigo[300]),
+                      children: [
+                        Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Column(children: [
+                              Divider(),
+                              SizedBox(height: 20),
+                              Text("Select Provider",
+                                  style: TextStyle(
+                                      fontSize: 21, color: Colors.black45)),
+                              SizedBox(height: 10),
+                              StreamBuilder(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('Stations')
+                                      .doc(station)
+                                      .collection('Provider')
+                                      .snapshots(),
+                                  builder: (context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (!snapshot.hasData)
+                                      Center(
+                                        child: const CupertinoActivityIndicator(),
+                                      );
+
+                                    return Container(
+                                        width: 350.0,
+                                        height: 58,
+                                        decoration: ShapeDecoration(
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                width: 1.0,
+                                                style: BorderStyle.solid),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(15.0)),
+                                          ),
+                                        ),
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            isExpanded: true,
+                                            icon: const Icon(Icons.arrow_drop_down),
+                                            iconSize: 24,
+                                            elevation: 16,
+                                            style: const TextStyle(
+                                                color: Colors.deepPurple),
+                                            underline: Container(
+                                              height: 2,
+                                              color: Colors.deepPurpleAccent,
+                                            ),
+                                            value: selecting_provider,
+                                            //isDense: true,
+                                            hint: Text('    Select Provider'),
+                                            onChanged: (newValue) {
+                                              Provider_changed(newValue);
+                                            },
+                                            items: snapshot.data != null
+                                                ? snapshot.data.docs.map(
+                                                    (DocumentSnapshot document) {
+                                                    return new DropdownMenuItem<
+                                                            String>(
+                                                        value: document
+                                                            .get('Provider_Name')
+                                                            .toString(),
+                                                        child: new Container(
+                                                          // height: 20.0,
+
+                                                          //color: primaryColor,
+
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 7,
+                                                                    left: 8),
+                                                            child: new Text(
+                                                              document
+                                                                  .get(
+                                                                      'Provider_Name')
+                                                                  .toString(),
+                                                              style: TextStyle(
+                                                                  fontSize: 20,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w900),
+                                                            ),
+                                                          ),
+                                                        ));
+                                                  }).toList()
+                                                : DropdownMenuItem(
+                                                    value: 'null',
                                                     child: new Container(
-                                                      // height: 20.0,
-
-                                                      //color: primaryColor,
-
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .only(
-                                                                top: 7,
-                                                                left: 8),
-                                                        child: new Text(
-                                                          document
-                                                              .get(
-                                                                  'Provider_Name')
-                                                              .toString(),
-                                                          style: TextStyle(
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w900),
-                                                        ),
-                                                      ),
-                                                    ));
-                                              }).toList()
-                                            : DropdownMenuItem(
-                                                value: 'null',
-                                                child: new Container(
-                                                  height: 100.0,
-                                                  child: new Text('null'),
-                                                ),
-                                              ),
-                                      ),
-                                    ));
-                              }),
-                          SizedBox(height: 20),
-                          Text("Provider Name",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
-                          SizedBox(height: 10),
-                          TextFormField(
-                              enabled: enable,
-                              readOnly: readOnlyOption,
-                              controller: t3,
-                              // enableInteractiveSelection: false,
-                              focusNode: FocusNode(),
-                              //readOnly: true,
-                              style: TextStyle(color: Colors.black),
-                              decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.blueAccent, width: 2.0),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                labelText: "Provider Name",
-                                fillColor: fillColor,
-                                filled: isfilled,
-                                labelStyle: TextStyle(color: Colors.black45),
-                              ),
-                              onChanged: (String s) {}),
-                          SizedBox(height: 15),
-                          Text("Provider Phone",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
-                          SizedBox(height: 10),
-                          TextFormField(
-                              enabled: enable,
-                              readOnly: readOnlyOption,
-                              controller: t4,
-
-                              // enableInteractiveSelection: false,
-                              focusNode: FocusNode(),
-                              //readOnly: true,
-                              style: TextStyle(color: Colors.black),
-                              decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.blueAccent, width: 2.0),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32.0)),
-                                ),
-                                labelText: "01000000",
-                                fillColor: fillColor,
-                                filled: isfilled,
-                                labelStyle: TextStyle(color: Colors.black45),
-                              ),
-                              onChanged: (String s) {}),
-                          SizedBox(height: 15),
-                          ButtonTheme(
-                            height: 50.0,
-                            minWidth: 130,
-                            child: RaisedButton(
-                              color: Colors.indigo[800],
-                              elevation: 12,
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.edit,
-                                        size: 22, color: Colors.white),
-                                    SizedBox(
-                                      width: 14,
+                                                      height: 100.0,
+                                                      child: new Text('null'),
+                                                    ),
+                                                  ),
+                                          ),
+                                        ));
+                                  }),
+                              SizedBox(height: 20),
+                              Text("Provider Name",
+                                  style: TextStyle(
+                                      fontSize: 21, color: Colors.black45)),
+                              SizedBox(height: 10),
+                              TextFormField(
+                                  enabled: enable,
+                                  readOnly: readOnlyOption,
+                                  controller: t3,
+                                  // enableInteractiveSelection: false,
+                                  focusNode: FocusNode(),
+                                  //readOnly: true,
+                                  style: TextStyle(color: Colors.black),
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.blueAccent),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
                                     ),
-                                    Text(save == 0 ? 'Edit' : 'Save',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 25)),
-                                  ]),
-                              onPressed: () {
-                                if (save == 0) {
-                                  setState(() {
-                                    enable = true;
-                                    save = 1;
-                                    fillColor = Colors.white;
-                                    readOnlyOption = false;
-                                  });
-                                } else {
-                                  update_provider();
-                                }
-                              },
-                            ),
-                          ),
-                        ]))
-                  ])),
-        ]));
-  }
-}
+                                    disabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.black),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
+                                    ),
+                                    labelText: "Provider Name",
+                                    fillColor: fillColor,
+                                    filled: isfilled,
+                                    labelStyle: TextStyle(color: Colors.black45),
+                                  ),
+                                  onChanged: (String s) {}),
+                              SizedBox(height: 15),
+                              Text("Provider Phone",
+                                  style: TextStyle(
+                                      fontSize: 21, color: Colors.black45)),
+                              SizedBox(height: 10),
+                              TextFormField(
+                                  enabled: enable,
+                                  readOnly: readOnlyOption,
+                                  controller: t4,
+
+                                  // enableInteractiveSelection: false,
+                                  focusNode: FocusNode(),
+                                  //readOnly: true,
+                                  style: TextStyle(color: Colors.black),
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.blueAccent),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.black),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32.0)),
+                                    ),
+                                    labelText: "01000000",
+                                    fillColor: fillColor,
+                                    filled: isfilled,
+                                    labelStyle: TextStyle(color: Colors.black45),
+                                  ),
+                                  onChanged: (String s) {}),
+                              SizedBox(height: 15),
+                              ButtonTheme(
+                                height: 50.0,
+                                minWidth: 130,
+                                child: RaisedButton(
+                                  color: Colors.indigo[800],
+                                  elevation: 12,
+                                  child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.edit,
+                                            size: 22, color: Colors.white),
+                                        SizedBox(
+                                          width: 14,
+                                        ),
+                                        Text(save == 0 ? 'Edit' : 'Save',
+                                            style: TextStyle(
+                                                color: Colors.white, fontSize: 25)),
+                                      ]),
+                                  onPressed: () {
+                                    if (save == 0) {
+                                      setState(() {
+                                        enable = true;
+                                        save = 1;
+                                        fillColor = Colors.white;
+                                        readOnlyOption = false;
+                                      });
+                                    } else {
+                                      update_provider();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ]))
+                      ])),
+            ])),
+      );}}
+    
+  
