@@ -4,6 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_petrol_station/services/cloud_services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'dashboard_firstore.dart';
 
 class AddContainer_Firestore extends StatefulWidget {
   static String id = "Add_Container";
@@ -127,272 +130,282 @@ class _AddContainer_FirestoreState extends State<AddContainer_Firestore> {
         'Fuel_Type_Id': Fuel_Type_Id,
         'Volume': int.parse(t4.text)
       });
+      t1.text='';
+      t2.text='';
+      t3.text='';
+      t4.text='';
+      
+      Fluttertoast.showToast(
+        msg: "The new container has been added..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.indigo[50],
-        appBar: AppBar(
-          backgroundColor: Color(0xFF083369),
-          actions: [
-            Row(
-              children: [
-                Icon(
-                  Icons.exit_to_app,
-                  size: 24,
-                  color: Colors.white,
-                ),
-                Text('LOGOUT',
-                    style: TextStyle(color: Colors.white, fontSize: 21.0)),
-                SizedBox(width: 20)
-              ],
-            )
-          ],
-        ),
-        drawer: getDrawer(),
-        body: ListView(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(' Add Container',
-                  style: TextStyle(
-                    color: Colors.amberAccent,
-                    fontSize: 36,
-                    fontWeight: FontWeight.w500,
-                  )),
-            ),
-            Padding(
+    return WillPopScope(
+      // ignore: missing_return
+      onWillPop: () { 
+        Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Dashboard()),
+  );
+       },
+      child: Scaffold(
+          backgroundColor: Colors.indigo[50],
+          appBar: AppBar(
+            backgroundColor: Color(0xFF083369),
+            
+          ),
+          drawer: getDrawer(),
+          body: ListView(
+            children: [
+              Padding(
                 padding: EdgeInsets.all(12),
-                child: Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Text("Container Name",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t1,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
+                child: Text(' Add Container',
+                    style: TextStyle(
+                      color: Colors.amberAccent,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w500,
+                    )),
+              ),
+              Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Text("Container Name",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              controller: t1,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 2.0),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                labelText: "Container Name",
+                                fillColor: Colors.white,
+                                labelStyle: TextStyle(color: Colors.black45),
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: "Container Name",
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        Text(
-                          container_name_error == 1
-                              ? 'You must enter a valid container name'
-                              : '',
-                          style: TextStyle(fontSize: 18.0, color: Colors.red),
-                        ),
-                        SizedBox(
-                          height: 12,
-                        ),
-                        Text("Capicity ",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            keyboardType: TextInputType.number,
-                            controller: t2,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: "1000",
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        Text(
-                          capacity_error == 1
-                              ? 'You must enter a valid capacity'
-                              : '',
-                          style: TextStyle(fontSize: 18.0, color: Colors.red),
-                        ),
-                        SizedBox(
-                          height: 12,
-                        ),
-                        Text("Fuel Type",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('Stations')
-                                .doc(station)
-                                .collection('Fuel_Type')
-                                .snapshots(),
-                            builder: (context,
-                                AsyncSnapshot<QuerySnapshot> snapshot) {
-                              if (!snapshot.hasData)
-                                Center(
-                                  child: const CupertinoActivityIndicator(),
-                                );
-
-                              return Container(
-                                  width: 350.0,
-                                  height: 58,
-                                  decoration: ShapeDecoration(
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          width: 1.0, style: BorderStyle.solid),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(15.0)),
-                                    ),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      isExpanded: true,
-                                      icon: const Icon(Icons.arrow_drop_down),
-                                      iconSize: 24,
-                                      elevation: 16,
-                                      style: const TextStyle(
-                                          color: Colors.deepPurple),
-                                      underline: Container(
-                                        height: 2,
-                                        color: Colors.deepPurpleAccent,
-                                      ),
-
-                                      value: category,
-                                      //isDense: true,
-                                      hint: Text('Fuel Type'),
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          category = newValue;
-                                        });
-                                      },
-                                      items: snapshot.data != null
-                                          ? snapshot.data.docs
-                                              .map((DocumentSnapshot document) {
-                                              return new DropdownMenuItem<
-                                                      String>(
-                                                  value: document
-                                                      .get('Fuel_Type_Name')
-                                                      .toString(),
-                                                  child: new Container(
-                                                    // height: 20.0,
-
-                                                    //color: primaryColor,
-
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              top: 7, left: 8),
-                                                      child: new Text(
-                                                        document
-                                                            .get(
-                                                                'Fuel_Type_Name')
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w900),
-                                                      ),
-                                                    ),
-                                                  ));
-                                            }).toList()
-                                          : DropdownMenuItem(
-                                              value: 'null',
-                                              child: new Container(
-                                                height: 100.0,
-                                                child: new Text('null'),
-                                              ),
-                                            ),
-                                    ),
-                                  ));
-                            }),
-                        SizedBox(height: 20),
-                        Text("Initial Volume ",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            keyboardType: TextInputType.number,
-                            controller: t4,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: "Initial Volume",
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        Text(
-                          volume_error == 1
-                              ? 'You must enter a valid volume'
-                              : '',
-                          style: TextStyle(fontSize: 18.0, color: Colors.red),
-                        ),
-                        SizedBox(
-                          height: 12,
-                        ),
-                        ButtonTheme(
-                          height: 50.0,
-                          minWidth: 130,
-                          child: RaisedButton(
-                            color: Colors.indigo[800],
-                            elevation: 12,
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.library_add_check_outlined,
-                                      size: 22, color: Colors.white),
-                                  SizedBox(
-                                    width: 14,
-                                  ),
-                                  Text('Save',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 25)),
-                                ]),
-                            onPressed: () {
-                              addContainer();
-                            },
+                              onChanged: (String s) {}),
+                          Text(
+                            container_name_error == 1
+                                ? 'You must enter a valid container name'
+                                : '',
+                            style: TextStyle(fontSize: 18.0, color: Colors.red),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            height: 12,
+                          ),
+                          Text("Capicity ",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: t2,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 2.0),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                labelText: "1000",
+                                fillColor: Colors.white,
+                                labelStyle: TextStyle(color: Colors.black45),
+                              ),
+                              onChanged: (String s) {}),
+                          Text(
+                            capacity_error == 1
+                                ? 'You must enter a valid capacity'
+                                : '',
+                            style: TextStyle(fontSize: 18.0, color: Colors.red),
+                          ),
+                          SizedBox(
+                            height: 12,
+                          ),
+                          Text("Fuel Type",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Stations')
+                                  .doc(station)
+                                  .collection('Fuel_Type')
+                                  .snapshots(),
+                              builder: (context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (!snapshot.hasData)
+                                  Center(
+                                    child: const CupertinoActivityIndicator(),
+                                  );
+
+                                return Container(
+                                    width: 350.0,
+                                    height: 58,
+                                    decoration: ShapeDecoration(
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 1.0, style: BorderStyle.solid),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15.0)),
+                                      ),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        icon: const Icon(Icons.arrow_drop_down),
+                                        iconSize: 24,
+                                        elevation: 16,
+                                        style: const TextStyle(
+                                            color: Colors.deepPurple),
+                                        underline: Container(
+                                          height: 2,
+                                          color: Colors.deepPurpleAccent,
+                                        ),
+
+                                        value: category,
+                                        //isDense: true,
+                                        hint: Text('Fuel Type'),
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            category = newValue;
+                                          });
+                                        },
+                                        items: snapshot.data != null
+                                            ? snapshot.data.docs
+                                                .map((DocumentSnapshot document) {
+                                                return new DropdownMenuItem<
+                                                        String>(
+                                                    value: document
+                                                        .get('Fuel_Type_Name')
+                                                        .toString(),
+                                                    child: new Container(
+                                                      // height: 20.0,
+
+                                                      //color: primaryColor,
+
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                top: 7, left: 8),
+                                                        child: new Text(
+                                                          document
+                                                              .get(
+                                                                  'Fuel_Type_Name')
+                                                              .toString(),
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900),
+                                                        ),
+                                                      ),
+                                                    ));
+                                              }).toList()
+                                            : DropdownMenuItem(
+                                                value: 'null',
+                                                child: new Container(
+                                                  height: 100.0,
+                                                  child: new Text('null'),
+                                                ),
+                                              ),
+                                      ),
+                                    ));
+                              }),
+                          SizedBox(height: 20),
+                          Text("Initial Volume ",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: t4,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 2.0),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                labelText: "Initial Volume",
+                                fillColor: Colors.white,
+                                labelStyle: TextStyle(color: Colors.black45),
+                              ),
+                              onChanged: (String s) {}),
+                          Text(
+                            volume_error == 1
+                                ? 'You must enter a valid volume'
+                                : '',
+                            style: TextStyle(fontSize: 18.0, color: Colors.red),
+                          ),
+                          SizedBox(
+                            height: 12,
+                          ),
+                          ButtonTheme(
+                            height: 50.0,
+                            minWidth: 130,
+                            child: RaisedButton(
+                              color: Colors.indigo[800],
+                              elevation: 12,
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.library_add_check_outlined,
+                                        size: 22, color: Colors.white),
+                                    SizedBox(
+                                      width: 14,
+                                    ),
+                                    Text('Save',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 25)),
+                                  ]),
+                              onPressed: () {
+                                addContainer();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ))
-          ],
-        ));
+                  ))
+            ],
+          )),
+    );
   }
 }
