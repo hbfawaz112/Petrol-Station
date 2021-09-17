@@ -2,10 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_petrol_station/widgets/Drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_petrol_station/widgets/Drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_petrol_station/Services/cloud_services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pattern_formatter/pattern_formatter.dart';
+import 'package:intl/intl.dart';
+
+import 'dashboard_firstore.dart';
 
 class Voucher extends StatefulWidget {
   static String id = 'Voucher';
@@ -27,12 +30,14 @@ class _VoucherState extends State<Voucher> {
 
   String station, pStation;
   User loggedInUser;
+   DateFormat ff;
 
   @override
   void initState() {
     super.initState();
-    t2.text = DateTime.now().toString();
     loggedInUser = cloudServices.getCurrentUser();
+     ff = DateFormat('yyyy-MM-dd');
+       t2.text = ff.format(DateTime.now()).toString();
     print("user");
     print(loggedInUser);
     asyncMethod();
@@ -124,355 +129,377 @@ class _VoucherState extends State<Voucher> {
         'Customer_Id': Customer_Id,
         'Fuel_Type_Id': Fuel_Type_Id,
         'Note': t3.text,
-        'Voucher_Date': DateTime.parse(t2.text),
+        'Voucher_Date': ff.parse(t2.text),
         'Voucher_Value': int.parse(g)
-        
-      }).then((value) => {
-       t1.clear(),
-       t2.clear(),
-       t3.clear(),
-       
-       
       });
+      Fluttertoast.showToast(
+        msg: "Voucher added succefully for the customer ${customer_name}",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+      t1.text='';
     }
-    
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.indigo[50],
-        appBar: AppBar(
-          backgroundColor: Color(0xFF083369),
-          actions: [
-            Row(
-              children: [
-                Icon(
-                  Icons.exit_to_app,
-                  size: 24,
-                  color: Colors.white,
-                ),
-                Text('LOGOUT',
-                    style: TextStyle(color: Colors.white, fontSize: 21.0)),
-                SizedBox(width: 20)
-              ],
-            )
-          ],
-        ),
-        drawer: getDrawer(),
-        body: ListView(
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Text('  Vouchers',
-                style: TextStyle(
-                  color: Colors.amberAccent,
-                  fontSize: 36,
-                  fontWeight: FontWeight.w500,
-                )),
-            SizedBox(
-              height: 20,
-            ),
-            Card(
-                elevation: 12,
-                child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 15),
-                        Text("Fuel Type",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('Stations')
-                                .doc(station)
-                                .collection('Fuel_Type')
-                                .snapshots(),
-                            builder: (context,
-                                AsyncSnapshot<QuerySnapshot> snapshot) {
-                              if (!snapshot.hasData)
-                                Center(
-                                  child: const CupertinoActivityIndicator(),
-                                );
 
-                              return Container(
-                                  width: 350.0,
-                                  height: 58,
-                                  decoration: ShapeDecoration(
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          width: 1.0, style: BorderStyle.solid),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(15.0)),
-                                    ),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      isExpanded: true,
+    return WillPopScope(
+      // ignore: missing_return
+      onWillPop: () { 
+        Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Dashboard()),
+  );
+       },
+      child: Scaffold(
+          backgroundColor: Colors.indigo[50],
+          appBar: AppBar(
+            backgroundColor: Color(0xFF083369),
+            
+          ),
+          drawer: getDrawer(),
+          body: ListView(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              Text('  Vouchers',
+                  style: TextStyle(
+                    color: Colors.amberAccent,
+                    fontSize: 36,
+                    fontWeight: FontWeight.w500,
+                  )),
+              SizedBox(
+                height: 20,
+              ),
+              Card(
+                  elevation: 12,
+                  child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          SizedBox(height: 15),
+                          Text("Fuel Type",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Stations')
+                                  .doc(station)
+                                  .collection('Fuel_Type')
+                                  .snapshots(),
+                              builder: (context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (!snapshot.hasData)
+                                  Center(
+                                    child: const CupertinoActivityIndicator(),
+                                  );
 
-                                      icon: const Icon(Icons.arrow_drop_down),
-                                      iconSize: 24,
-                                      elevation: 16,
-                                      style: const TextStyle(
-                                          color: Colors.deepPurple),
-
-                                      value: fuel_type,
-                                      //isDense: true,
-                                      hint: Text('Fuel Type'),
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          fuel_type = newValue;
-                                        });
-                                      },
-                                      items: snapshot.data != null
-                                          ? snapshot.data.docs
-                                              .map((DocumentSnapshot document) {
-                                              return new DropdownMenuItem<
-                                                      String>(
-                                                  value: document
-                                                      .get('Fuel_Type_Name')
-                                                      .toString(),
-                                                  child: new Container(
-                                                    // height: 20.0,
-
-                                                    //color: primaryColor,
-
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              top: 7, left: 8),
-                                                      child: new Text(
-                                                        document
-                                                            .get(
-                                                                'Fuel_Type_Name')
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w900),
-                                                      ),
-                                                    ),
-                                                  ));
-                                            }).toList()
-                                          : DropdownMenuItem(
-                                              value: 'null',
-                                              child: new Container(
-                                                height: 100.0,
-                                                child: new Text('null'),
-                                              ),
-                                            ),
-                                    ),
-                                  ));
-                            }),
-                        SizedBox(height: 15),
-                        Text("Voucher Value (L.L)",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t1,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              ThousandsFormatter(),
-                            ],
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              disabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.black),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: "value (L.L)",
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        SizedBox(height: 5),
-                        Text(
-                            voucher_value_error == 1
-                                ? 'Invalid Voucher value(must enter a valid one)'
-                                : '',
-                            style: TextStyle(color: Colors.red, fontSize: 21)),
-                        SizedBox(height: 5),
-                        Text("Customer Name",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('Stations')
-                                .doc(station)
-                                .collection('Customer')
-                                .snapshots(),
-                            builder: (context,
-                                AsyncSnapshot<QuerySnapshot> snapshot) {
-                              if (!snapshot.hasData)
-                                Center(
-                                  child: const CupertinoActivityIndicator(),
-                                );
-
-                              return Container(
-                                  width: 350.0,
-                                  height: 58,
-                                  decoration: ShapeDecoration(
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          width: 1.0, style: BorderStyle.solid),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(15.0)),
-                                    ),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      isExpanded: true,
-                                      icon: const Icon(Icons.arrow_drop_down),
-                                      iconSize: 24,
-                                      elevation: 16,
-                                      style: const TextStyle(
-                                          color: Colors.deepPurple),
-                                      underline: Container(
-                                        height: 2,
-                                        color: Colors.deepPurpleAccent,
+                                return Container(
+                                    width: 350.0,
+                                    height: 58,
+                                    decoration: ShapeDecoration(
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 1.0, style: BorderStyle.solid),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15.0)),
                                       ),
-
-                                      value: customer_name,
-                                      //isDense: true,
-                                      hint: Text('Customer Name'),
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          customer_name = newValue;
-                                        });
-                                      },
-                                      items: snapshot.data != null
-                                          ? snapshot.data.docs
-                                              .map((DocumentSnapshot document) {
-                                              return new DropdownMenuItem<
-                                                      String>(
-                                                  value: document
-                                                      .get('Customer_Name')
-                                                      .toString(),
-                                                  child: new Container(
-                                                    // height: 20.0,
-
-                                                    //color: primaryColor,
-
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              top: 7, left: 8),
-                                                      child: new Text(
-                                                        document
-                                                            .get(
-                                                                'Customer_Name')
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w900),
-                                                      ),
-                                                    ),
-                                                  ));
-                                            }).toList()
-                                          : DropdownMenuItem(
-                                              value: 'null',
-                                              child: new Container(
-                                                height: 100.0,
-                                                child: new Text('null'),
-                                              ),
-                                            ),
                                     ),
-                                  ));
-                            }),
-                        SizedBox(height: 20),
-                        Text("Voucher Date",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t2,
-                            keyboardType: TextInputType.datetime,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              disabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.black),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: DateTime.now().toString(),
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        SizedBox(height: 25),
-                        TextFormField(
-                            controller: t3,
-                            maxLines: 3,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                                enabledBorder: const OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.black, width: 2.0),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value: fuel_type,
+                                        icon: const Icon(Icons.arrow_drop_down),
+                                        iconSize: 24,
+                                        elevation: 16,
+                                        style: const TextStyle(
+                                            color: Colors.deepPurple),
+                                        underline: Container(
+                                          height: 2,
+                                          color: Colors.deepPurpleAccent,
+                                        ),
+                                        hint: Center(
+                                            child: Text('Fuel Type',
+                                                style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight:
+                                                        FontWeight.w400))),
+                                       onChanged: (newValue) {
+                                          setState(() {
+                                            fuel_type = newValue;
+                                          });
+                                        },
+                                        items: snapshot.data != null
+                                            ? snapshot.data.docs
+                                                .map((DocumentSnapshot document) {
+                                                return new DropdownMenuItem<
+                                                        String>(
+                                                    value: document
+                                                        .get('Fuel_Type_Name')
+                                                        .toString(),
+                                                    child: new Container(
+                                                      child: Center(
+                                                        child: new Text(
+                                                          document
+                                                              .get(
+                                                                  'Fuel_Type_Name')
+                                                              .toString(),
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400),
+                                                        ),
+                                                      ),
+                                                    ));
+                                              }).toList()
+                                            : DropdownMenuItem(
+                                                value: 'null',
+                                                child: new Container(
+                                                  height: 100.0,
+                                                  child: new Text('null'),
+                                                ),
+                                              ),
+                                      ),
+                                    ),      
+                                    );
+                              }),
+                          SizedBox(height: 15),
+                          Text("Voucher Value (L.L)",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              controller: t1,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                ThousandsFormatter(),
+                              ],
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
                                 ),
-                                labelText: "Note",
-                                fillColor: Colors.black,
-                                labelStyle: TextStyle(color: Colors.black45),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
                                 focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.blueAccent, width: 2.0))),
-                            onChanged: (String s) {}),
-                        SizedBox(height: 18),
-                        ButtonTheme(
-                          height: 50.0,
-                          minWidth: 130,
-                          child: RaisedButton(
-                            color: Colors.indigo[800],
-                            elevation: 12,
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.my_library_add_outlined,
-                                      color: Colors.white, size: 20),
-                                  Text('Add',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 25)),
-                                ]),
-                            onPressed: () {
-                              Add_Voucher();
-                            },
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 2.0),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                labelText: "value (L.L)",
+                                fillColor: Colors.white,
+                                labelStyle: TextStyle(color: Colors.black45),
+                              ),
+                              onChanged: (String s) {}),
+                          SizedBox(height: 5),
+                          Text(
+                              voucher_value_error == 1
+                                  ? 'Invalid Voucher value(must enter a valid one)'
+                                  : '',
+                              style: TextStyle(color: Colors.red, fontSize: 21)),
+                          SizedBox(height: 5),
+                          Text("Customer Name",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          
+                          StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Stations')
+                                  .doc(station)
+                                  .collection('Customer')
+                                  .snapshots(),
+                              builder: (context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (!snapshot.hasData)
+                                  Center(
+                                    child: const CupertinoActivityIndicator(),
+                                  );
+
+                                return Container(
+                                    width: 350.0,
+                                    height: 58,
+                                    decoration: ShapeDecoration(
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 1.0, style: BorderStyle.solid),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15.0)),
+                                      ),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        icon: const Icon(Icons.arrow_drop_down),
+                                        iconSize: 24,
+                                        elevation: 16,
+                                        style: const TextStyle(
+                                            color: Colors.deepPurple),
+                                        underline: Container(
+                                          height: 2,
+                                          color: Colors.deepPurpleAccent,
+                                        ),
+
+                                        value: customer_name,
+                                        //isDense: true,
+                                        hint: Text('Customer Name'),
+                                        onChanged: (String newValue) {
+                                          setState(() {
+                                            customer_name = newValue;
+                                          });
+                                        },
+                                        items: snapshot.data != null
+                                            ? snapshot.data.docs
+                                                .map((DocumentSnapshot document) {
+                                                return new DropdownMenuItem<
+                                                        String>(
+                                                    value: document
+                                                        .get('Customer_Name')
+                                                        .toString(),
+                                                    child: new Container(
+                                                      // height: 20.0,
+
+                                                      //color: primaryColor,
+
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                top: 7, left: 8),
+                                                        child: new Text(
+                                                          document
+                                                              .get(
+                                                                  'Customer_Name')
+                                                              .toString(),
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900),
+                                                        ),
+                                                      ),
+                                                    ));
+                                              }).toList()
+                                            : DropdownMenuItem(
+                                                value: 'null',
+                                                child: new Container(
+                                                  height: 100.0,
+                                                  child: new Text('null'),
+                                                ),
+                                              ),
+                                      ),
+                                    ));
+                              }),
+                          SizedBox(height: 20),
+                          Text("Voucher Date",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              controller: t2,
+                              keyboardType: TextInputType.datetime,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 2.0),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                               // labelText: DateTime.now().toString(),
+                                fillColor: Colors.white,
+                                labelStyle: TextStyle(color: Colors.black45),
+                              ),
+
+onTap: () async {
+                  DateTime pickedDate = await showDatePicker(
+                      context: context, initialDate: DateTime.now(),
+                      firstDate: DateTime(2000), //DateTime.now() - not to allow to choose before today.
+                      lastDate: DateTime(2101)
+                  );
+                  
+                  if(pickedDate != null ){
+                      print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
+                      String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate); 
+                      print(formattedDate); //formatted date output using intl package =>  2021-03-16
+                        //you can implement different kind of Date Format here according to your requirement
+
+                      setState(() {
+                         t2.text = formattedDate; //set output date to TextField value. 
+                      });
+                  }else{
+                      print("Date is not selected");
+                  }
+                },
+
+                              onChanged: (String s) {}),
+                          SizedBox(height: 25),
+                          TextFormField(
+                              controller: t3,
+                              maxLines: 3,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.black, width: 2.0),
+                                  ),
+                                  labelText: "Note",
+                                  fillColor: Colors.black,
+                                  labelStyle: TextStyle(color: Colors.black45),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.blueAccent, width: 2.0))),
+                              onChanged: (String s) {}),
+                          SizedBox(height: 18),
+                          ButtonTheme(
+                            height: 50.0,
+                            minWidth: 130,
+                            child: RaisedButton(
+                              color: Colors.indigo[800],
+                              elevation: 12,
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.my_library_add_outlined,
+                                        color: Colors.white, size: 20),
+                                    Text('Add',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 25)),
+                                  ]),
+                              onPressed: () {
+                                Add_Voucher();
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    )))
-          ],
-        ));
+                        ],
+                      )))
+            ],
+          )),
+    );
   }
 }
