@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_petrol_station/Screens/shipments.dart';
 import 'package:flutter_petrol_station/Services/cloud_services.dart';
 import 'package:flutter_petrol_station/Widgets/Drawer.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:intl/number_symbols.dart';
+
+import 'dashboard_firstore.dart';
 
 NumberFormat numberFormat = new NumberFormat('###,000');
 
@@ -39,6 +41,8 @@ class _CustomersState extends State<Customers> {
   TextEditingController t9 = new TextEditingController();
   TextEditingController t10 = new TextEditingController();
 
+ DateFormat fff;
+ 
   int sumvouchervalue = 0;
   int sumtransactionvalue = 0;
   int totaldept = 1;
@@ -74,6 +78,10 @@ class _CustomersState extends State<Customers> {
 
   @override
   void initState() {
+   
+     fff = DateFormat('yyyy-MM-dd');
+       t9.text = fff.format(DateTime.now()).toString();
+     t10.text = fff.format(DateTime.now()).toString();
     super.initState();
     loggedInUser = cloudServices.getCurrentUser();
     asyncMethod();
@@ -122,6 +130,19 @@ class _CustomersState extends State<Customers> {
       'Email': t3.text,
     });
     print('done addedd');
+      Fluttertoast.showToast(
+                      msg: "The new customer has been added",
+                toastLength: Toast.LENGTH_SHORT,
+                                           gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.green,
+                                                     textColor: Colors.white,
+                                               fontSize: 16.0
+      );
+      t1.text='';
+      t3.text='';
+      t2.text='';
+      
   }
 
   //fuction get all dept mony to all customer:
@@ -496,98 +517,124 @@ class _CustomersState extends State<Customers> {
   }
 
   PayoffshowAlertDialog(BuildContext context) {
-    t8.text = DateTime.now().toString();
+    fff=DateFormat('yyyy-MM-dd');
+
+    t8.text = fff.format(DateTime.now()).toString();
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text("Pay OFF", style: TextStyle(fontSize: 25, color: Colors.red)),
-      content: Column(children: [
-        SizedBox(height: 20),
-        Text("Value", style: TextStyle(fontSize: 21, color: Colors.black45)),
-        SizedBox(height: 10),
-        TextFormField(
+      content: Expanded(
+        child: Column(children: [
+          SizedBox(height: 20),
+          Text("Value", style: TextStyle(fontSize: 21, color: Colors.black45)),
+          SizedBox(height: 10),
+          TextFormField(
+              keyboardType: TextInputType.number,
+              controller: t7,
+              inputFormatters: [
+                ThousandsFormatter(),
+              ],
+              //  enabled: false,
+              //enableInteractiveSelection: false,
+              style: TextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.black, width: 2.0),
+                  ),
+                  fillColor: Colors.white,
+                  //labelStyle: TextStyle(color: Colors.black45),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Colors.blueAccent, width: 2.0))),
+              onChanged: (String s) {}),
+          SizedBox(height: 15),
+          Text("Date", style: TextStyle(fontSize: 21, color: Colors.black45)),
+          SizedBox(height: 10),
+          TextFormField(
             keyboardType: TextInputType.number,
-            controller: t7,
-            inputFormatters: [
-              ThousandsFormatter(),
-            ],
-            //  enabled: false,
-            //enableInteractiveSelection: false,
-            style: TextStyle(color: Colors.black),
-            decoration: InputDecoration(
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.black, width: 2.0),
+              controller: t8,
+              // enabled: false,
+              //enableInteractiveSelection: false,
+              style: TextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blueAccent),
+                  borderRadius: BorderRadius.all(Radius.circular(32.0)),
                 ),
-                fillColor: Colors.white,
-                //labelStyle: TextStyle(color: Colors.black45),
                 focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.blueAccent, width: 2.0))),
-            onChanged: (String s) {}),
-        SizedBox(height: 15),
-        Text("Date", style: TextStyle(fontSize: 21, color: Colors.black45)),
-        SizedBox(height: 10),
-        TextFormField(
-            controller: t8,
-            // enabled: false,
-            //enableInteractiveSelection: false,
-            style: TextStyle(color: Colors.black),
-            decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blueAccent),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                  borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
+                  borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                ), //labelText: phone,
+                fillColor: Colors.white,
+                labelStyle: TextStyle(color: Colors.black45),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
-              ), //labelText: phone,
-              fillColor: Colors.white,
-              labelStyle: TextStyle(color: Colors.black45),
+               onTap: () async {
+                  DateTime pickedDate = await showDatePicker(
+                      context: context, initialDate: DateTime.now(),
+                      firstDate: DateTime(2000), //DateTime.now() - not to allow to choose before today.
+                      lastDate: DateTime(2101)
+                  );
+                  
+                  if(pickedDate != null ){
+                      print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
+                      String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate); 
+                      print(formattedDate); //formatted date output using intl package =>  2021-03-16
+                        //you can implement different kind of Date Format here according to your requirement
+
+                      setState(() {
+                         t8.text = formattedDate; //set output date to TextField value. 
+                      });
+                  }else{
+                      print("Date is not selected");
+                  }
+                },
+
+              onChanged: (String s) {}),
+          ButtonTheme(
+            height: 50.0,
+            minWidth: 130,
+            child: RaisedButton(
+              color: Colors.indigo[800],
+              elevation: 12,
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.library_add_check_outlined,
+                    size: 22, color: Colors.white),
+                SizedBox(
+                  width: 14,
+                ),
+                Text('Pay', style: TextStyle(color: Colors.white, fontSize: 25)),
+              ]),
+              onPressed: () {
+                pay_transaction();
+                sleep(Duration(seconds: 1));
+                Navigator.pop(context);
+              },
             ),
-            onChanged: (String s) {}),
-        ButtonTheme(
-          height: 50.0,
-          minWidth: 130,
-          child: RaisedButton(
-            color: Colors.indigo[800],
-            elevation: 12,
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.library_add_check_outlined,
-                  size: 22, color: Colors.white),
-              SizedBox(
-                width: 14,
-              ),
-              Text('Pay', style: TextStyle(color: Colors.white, fontSize: 25)),
-            ]),
-            onPressed: () {
-              pay_transaction();
-              sleep(Duration(seconds: 2));
-              Navigator.pop(context);
-            },
           ),
-        ),
-        SizedBox(height: 15),
-        ButtonTheme(
-          height: 50.0,
-          minWidth: 130,
-          child: RaisedButton(
-            color: Colors.indigo[800],
-            elevation: 12,
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.library_add_check_outlined,
-                  size: 22, color: Colors.white),
-              SizedBox(
-                width: 14,
-              ),
-              Text('Cancel',
-                  style: TextStyle(color: Colors.white, fontSize: 25)),
-            ]),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+          SizedBox(height: 15),
+          ButtonTheme(
+            height: 50.0,
+            minWidth: 130,
+            child: RaisedButton(
+              color: Colors.indigo[800],
+              elevation: 12,
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.library_add_check_outlined,
+                    size: 22, color: Colors.white),
+                SizedBox(
+                  width: 14,
+                ),
+                Text('Cancel',
+                    style: TextStyle(color: Colors.white, fontSize: 25)),
+              ]),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ),
-        ),
-      ]),
+        ]),
+      ),
     );
 
     // show the dialog
@@ -647,6 +694,15 @@ class _CustomersState extends State<Customers> {
       'Transaction_Value': int.parse(g)
     });
     print('done addedd');
+      Fluttertoast.showToast(
+             msg: "Pay Transaction Successfully",
+                                                                              toastLength: Toast.LENGTH_SHORT,
+                                                                              gravity: ToastGravity.BOTTOM,
+                                                                              timeInSecForIosWeb: 1,
+                                                                              backgroundColor: Colors.green,
+                                                                              textColor: Colors.white,
+                                                                              fontSize: 16.0
+                                                                          );
     Customer_selected(customer_drop);
     setState(() {});
   }
@@ -681,326 +737,40 @@ class _CustomersState extends State<Customers> {
     totaldept = 0;
     // totalDept();
 
-    return Scaffold(
-        backgroundColor: Colors.indigo[50],
-        appBar: AppBar(
-          backgroundColor: Color(0xFF083369),
-          actions: [
-            Row(
-              children: [
-                Icon(
-                  Icons.exit_to_app,
-                  size: 24,
-                  color: Colors.white,
-                ),
-                Text('LOGOUT',
-                    style: TextStyle(color: Colors.white, fontSize: 21.0)),
-                SizedBox(width: 20)
-              ],
-            )
-          ],
-        ),
-        drawer: getDrawer(),
-        body: ListView(children: [
-          Card(
-              elevation: 12,
-              child: ExpansionTile(
-                title: Text("Add Customer",
-                    style: TextStyle(fontSize: 29, color: Colors.indigo[300])),
-                trailing: Icon(Icons.arrow_drop_down,
-                    size: 20, color: Colors.indigo[300]),
-                children: [
-                  Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Column(children: [
-                        SizedBox(height: 20),
-                        Text("Name",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t1,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: "Customer Name",
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        SizedBox(height: 15),
-                        Text("Phone",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t2,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: "ex:01111111",
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        SizedBox(height: 15),
-                        Text("Email",
-                            style:
-                                TextStyle(fontSize: 21, color: Colors.black45)),
-                        SizedBox(height: 10),
-                        TextFormField(
-                            controller: t3,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 2.0),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(32.0)),
-                              ),
-                              labelText: "example@example.com",
-                              fillColor: Colors.white,
-                              labelStyle: TextStyle(color: Colors.black45),
-                            ),
-                            onChanged: (String s) {}),
-                        SizedBox(height: 22),
-                        ButtonTheme(
-                          height: 50.0,
-                          minWidth: 130,
-                          child: RaisedButton(
-                            color: Colors.indigo[800],
-                            elevation: 12,
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.library_add_check_outlined,
-                                      size: 22, color: Colors.white),
-                                  SizedBox(
-                                    width: 14,
-                                  ),
-                                  Text('Save',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 25)),
-                                ]),
-                            onPressed: () {
-                              add_customer();
-                            },
-                          ),
-                        ),
-                      ]))
-                ],
-                backgroundColor: Colors.white,
-                initiallyExpanded: false,
-              )),
-
-          /*********************************************************/
-          SizedBox(height: 15),
-          Card(
-              elevation: 12,
-              child: ExpansionTile(
-                  title: Text("Customer Info",
-                      style:
-                          TextStyle(fontSize: 29, color: Colors.indigo[300])),
+    return WillPopScope(
+      // ignore: missing_return
+      onWillPop: () { 
+        Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Dashboard()),
+  );
+       },
+      child: Scaffold(
+          backgroundColor: Colors.indigo[50],
+          appBar: AppBar(
+            backgroundColor: Color(0xFF083369),
+            
+          ),
+          drawer: getDrawer(),
+          body: ListView(children: [
+            Card(
+                elevation: 12,
+                child: ExpansionTile(
+                  title: Text("Add Customer",
+                      style: TextStyle(fontSize: 29, color: Colors.indigo[300])),
                   trailing: Icon(Icons.arrow_drop_down,
                       size: 20, color: Colors.indigo[300]),
                   children: [
                     Padding(
                         padding: EdgeInsets.all(20),
                         child: Column(children: [
-                          Text("Customer Name",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
-                          SizedBox(height: 10),
-                          StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('Stations')
-                                .doc(station)
-                                .collection('Customer')
-                                .snapshots(),
-                            builder: (context,
-                                AsyncSnapshot<QuerySnapshot> snapshot) {
-                              if (snapshot.hasData) {
-                                return Container(
-                                  width: 350.0,
-                                  height: 58,
-                                  decoration: ShapeDecoration(
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          width: 1.0, style: BorderStyle.solid),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(15.0)),
-                                    ),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      isExpanded: true,
-                                      value: customer_drop,
-                                      icon: const Icon(Icons.arrow_drop_down),
-                                      iconSize: 24,
-                                      elevation: 16,
-                                      style: const TextStyle(
-                                          color: Colors.deepPurple),
-                                      underline: Container(
-                                        height: 2,
-                                        color: Colors.deepPurpleAccent,
-                                      ),
-                                      hint: Center(
-                                          child: Text('Select Customer',
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight:
-                                                      FontWeight.w400))),
-                                      onChanged: (String newValue) {
-                                        Customer_selected(newValue);
-                                      },
-                                      items: snapshot.data != null
-                                          ? snapshot.data.docs
-                                              .map((DocumentSnapshot document) {
-                                              return new DropdownMenuItem<
-                                                      String>(
-                                                  value: document
-                                                      .get('Customer_Name')
-                                                      .toString(),
-                                                  child: new Container(
-                                                    child: Center(
-                                                      child: new Text(
-                                                        document
-                                                            .get(
-                                                                'Customer_Name')
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w400),
-                                                      ),
-                                                    ),
-                                                  ));
-                                            }).toList()
-                                          : DropdownMenuItem(
-                                              value: 'null',
-                                              child: new Container(
-                                                height: 100.0,
-                                                child: new Text('null'),
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                return Text('');
-                              }
-                            },
-                          ),
-                          SizedBox(
-                            height: 17,
-                          ),
-                          Row(
-                            children: [
-                              Text('Total Dept : ',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 27)),
-                              Text('${ numberFormat.format(total_dept_to_text)} (L.L.)',
-                                  style: TextStyle(
-                                      color: Colors.black38,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 24)),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Visibility(
-                            visible: visible_buttons,
-                            child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  ButtonTheme(
-                                    height: 50.0,
-                                    minWidth: 100,
-                                    child: RaisedButton(
-                                      color: Color(0xFF083369),
-                                      elevation: 6,
-                                      child: Text('View',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 19)),
-                                      onPressed: () {
-                                        ViewshowAlertDialog(context);
-                                      },
-                                    ),
-                                  ),
-                                  ButtonTheme(
-                                    height: 50.0,
-                                    minWidth: 100,
-                                    child: RaisedButton(
-                                      color: Color(0xFF083369),
-                                      elevation: 6,
-                                      child: Text('Edit',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 19)),
-                                      onPressed: () {
-                                        EditshowAlertDialog(context);
-                                      },
-                                    ),
-                                  ),
-                                  ButtonTheme(
-                                    height: 50.0,
-                                    minWidth: 100,
-                                    child: RaisedButton(
-                                      color: Color(0xFF083369),
-                                      elevation: 6,
-                                      child: Text('Pay Off',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 19)),
-                                      onPressed: () {
-                                        PayoffshowAlertDialog(context);
-                                      },
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          SizedBox(
-                            height: 26,
-                          ),
-                          Text("From Date",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 20),
+                          Text("Name",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
                           SizedBox(height: 10),
                           TextFormField(
-                              controller: t9,
+                              controller: t1,
                               style: TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 enabledBorder: OutlineInputBorder(
@@ -1015,18 +785,18 @@ class _CustomersState extends State<Customers> {
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(32.0)),
                                 ),
-                                labelText: ff.format(DateTime.now()),
+                                labelText: "Customer Name",
                                 fillColor: Colors.white,
                                 labelStyle: TextStyle(color: Colors.black45),
                               ),
                               onChanged: (String s) {}),
                           SizedBox(height: 15),
-                          Text("To Date",
-                              style: TextStyle(
-                                  fontSize: 21, color: Colors.black45)),
+                          Text("Phone",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
                           SizedBox(height: 10),
                           TextFormField(
-                              controller: t10,
+                              controller: t2,
                               style: TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 enabledBorder: OutlineInputBorder(
@@ -1041,59 +811,461 @@ class _CustomersState extends State<Customers> {
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(32.0)),
                                 ),
-                                labelText: ff.format(DateTime.now()),
+                                labelText: "ex:01111111",
                                 fillColor: Colors.white,
                                 labelStyle: TextStyle(color: Colors.black45),
                               ),
                               onChanged: (String s) {}),
-                          SizedBox(height: 20),
+                          SizedBox(height: 15),
+                          Text("Email",
+                              style:
+                                  TextStyle(fontSize: 21, color: Colors.black45)),
+                          SizedBox(height: 10),
+                          TextFormField(
+                              controller: t3,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 2.0),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                labelText: "example@example.com",
+                                fillColor: Colors.white,
+                                labelStyle: TextStyle(color: Colors.black45),
+                              ),
+                              onChanged: (String s) {}),
+                          SizedBox(height: 22),
                           ButtonTheme(
                             height: 50.0,
-                            minWidth: 30,
+                            minWidth: 130,
                             child: RaisedButton(
                               color: Colors.indigo[800],
                               elevation: 12,
                               child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text('Filter',
+                                    Icon(Icons.library_add_check_outlined,
+                                        size: 22, color: Colors.white),
+                                    SizedBox(
+                                      width: 14,
+                                    ),
+                                    Text('Save',
                                         style: TextStyle(
                                             color: Colors.white, fontSize: 25)),
-                                    Icon(Icons.filter_alt_outlined,
-                                        color: Colors.white, size: 20)
                                   ]),
                               onPressed: () {
-                                setState(() {
-                                  isfilter = true;
-                                  fromDate = t9.text;
-                                  toDate = t10.text;
-                                  fD = ff.parse(fromDate);
-                                  tD = ff.parse(toDate);
-                                  myTimeStamp = Timestamp.fromDate(fD);
-                                  myTimeStamp1 = Timestamp.fromDate(tD);
-
-                                  print(
-                                      '***************** ${myTimeStamp}************');
-                                  print(
-                                      '******************* ${myTimeStamp1}**********');
-                                });
+                                add_customer();
                               },
                             ),
                           ),
-                          Divider(thickness: 3, color: Colors.black45),
-                          SizedBox(height: 12),
-                          ExpansionTile(
-                              title: Text(sum_transaction_title,
-                                  style: TextStyle(
-                                      fontSize: 25, color: Colors.indigo[300])),
-                              trailing: Icon(Icons.arrow_drop_down,
-                                  size: 20, color: Colors.indigo[300]),
+                        ]))
+                  ],
+                  backgroundColor: Colors.white,
+                  initiallyExpanded: false,
+                )),
+
+            /*********************************************************/
+            SizedBox(height: 15),
+            Card(
+                elevation: 12,
+                child: ExpansionTile(
+                    title: Text("Customer Info",
+                        style:
+                            TextStyle(fontSize: 29, color: Colors.indigo[300])),
+                    trailing: Icon(Icons.arrow_drop_down,
+                        size: 20, color: Colors.indigo[300]),
+                    children: [
+                      Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(children: [
+                            Text("Customer Name",
+                                style: TextStyle(
+                                    fontSize: 21, color: Colors.black45)),
+                            SizedBox(height: 10),
+                            StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Stations')
+                                  .doc(station)
+                                  .collection('Customer')
+                                  .snapshots(),
+                              builder: (context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (snapshot.hasData) {
+                                  return Container(
+                                    width: 350.0,
+                                    height: 58,
+                                    decoration: ShapeDecoration(
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 1.0, style: BorderStyle.solid),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15.0)),
+                                      ),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value: customer_drop,
+                                        icon: const Icon(Icons.arrow_drop_down),
+                                        iconSize: 24,
+                                        elevation: 16,
+                                        style: const TextStyle(
+                                            color: Colors.deepPurple),
+                                        underline: Container(
+                                          height: 2,
+                                          color: Colors.deepPurpleAccent,
+                                        ),
+                                        hint: Center(
+                                            child: Text('Select Customer',
+                                                style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight:
+                                                        FontWeight.w400))),
+                                        onChanged: (String newValue) {
+                                          Customer_selected(newValue);
+                                        },
+                                        items: snapshot.data != null
+                                            ? snapshot.data.docs
+                                                .map((DocumentSnapshot document) {
+                                                return new DropdownMenuItem<
+                                                        String>(
+                                                    value: document
+                                                        .get('Customer_Name')
+                                                        .toString(),
+                                                    child: new Container(
+                                                      child: Center(
+                                                        child: new Text(
+                                                          document
+                                                              .get(
+                                                                  'Customer_Name')
+                                                              .toString(),
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400),
+                                                        ),
+                                                      ),
+                                                    ));
+                                              }).toList()
+                                            : DropdownMenuItem(
+                                                value: 'null',
+                                                child: new Container(
+                                                  height: 100.0,
+                                                  child: new Text('null'),
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  return Text('');
+                                }
+                              },
+                            ),
+                            SizedBox(
+                              height: 17,
+                            ),
+                            Row(
                               children: [
-                                Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Column(children: [
-                                      SizedBox(height: 5),
-                                      SingleChildScrollView(
+                                Text('Total Dept : ',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 27)),
+                                Text('${total_dept_to_text} (L.L.)',
+                                    style: TextStyle(
+                                        color: Colors.black38,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 24)),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Visibility(
+                              visible: visible_buttons,
+                              child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ButtonTheme(
+                                      height: 50.0,
+                                      minWidth: 100,
+                                      child: RaisedButton(
+                                        color: Color(0xFF083369),
+                                        elevation: 6,
+                                        child: Text('View',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 19)),
+                                        onPressed: () {
+                                          ViewshowAlertDialog(context);
+                                        },
+                                      ),
+                                    ),
+                                    ButtonTheme(
+                                      height: 50.0,
+                                      minWidth: 100,
+                                      child: RaisedButton(
+                                        color: Color(0xFF083369),
+                                        elevation: 6,
+                                        child: Text('Edit',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 19)),
+                                        onPressed: () {
+                                          EditshowAlertDialog(context);
+                                        },
+                                      ),
+                                    ),
+                                    ButtonTheme(
+                                      height: 50.0,
+                                      minWidth: 100,
+                                      child: RaisedButton(
+                                        color: Color(0xFF083369),
+                                        elevation: 6,
+                                        child: Text('Pay Off',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 19)),
+                                        onPressed: () {
+                                          PayoffshowAlertDialog(context);
+                                        },
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                            SizedBox(
+                              height: 26,
+                            ),
+                            Text("From Date",
+                                style: TextStyle(
+                                    fontSize: 21, color: Colors.black45)),
+                            SizedBox(height: 10),
+                            TextFormField(
+                                controller: t9,
+                                style: TextStyle(color: Colors.black),
+                                decoration: InputDecoration(
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(32.0)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.blueAccent, width: 2.0),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(32.0)),
+                                  ),
+                                 // labelText: ff.format(DateTime.now()),
+                                  fillColor: Colors.white,
+                                  labelStyle: TextStyle(color: Colors.black45),
+                                ),
+                                 onTap: () async {
+                  DateTime pickedDate = await showDatePicker(
+                      context: context, initialDate: DateTime.now(),
+                      firstDate: DateTime(2000), //DateTime.now() - not to allow to choose before today.
+                      lastDate: DateTime(2101)
+                  );
+                  
+                  if(pickedDate != null ){
+                      print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
+                      String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate); 
+                      print(formattedDate); //formatted date output using intl package =>  2021-03-16
+                        //you can implement different kind of Date Format here according to your requirement
+
+                      setState(() {
+                         t9.text = formattedDate; //set output date to TextField value. 
+                      });
+                  }else{
+                      print("Date is not selected");
+                  }
+                },
+                                onChanged: (String s) {}),
+                            SizedBox(height: 15),
+                            Text("To Date",
+                                style: TextStyle(
+                                    fontSize: 21, color: Colors.black45)),
+                            SizedBox(height: 10),
+                            TextFormField(
+                                controller: t10,
+                                style: TextStyle(color: Colors.black),
+                                decoration: InputDecoration(
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(32.0)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.blueAccent, width: 2.0),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(32.0)),
+                                  ),
+                                 // labelText: ff.format(DateTime.now()),
+                                  fillColor: Colors.white,
+                                  labelStyle: TextStyle(color: Colors.black45),
+                                ),
+                                 onTap: () async {
+                  DateTime pickedDate = await showDatePicker(
+                      context: context, initialDate: DateTime.now(),
+                      firstDate: DateTime(2000), //DateTime.now() - not to allow to choose before today.
+                      lastDate: DateTime(2101)
+                  );
+                  
+                  if(pickedDate != null ){
+                      print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
+                      String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate); 
+                      print(formattedDate); //formatted date output using intl package =>  2021-03-16
+                        //you can implement different kind of Date Format here according to your requirement
+
+                      setState(() {
+                         t10.text = formattedDate; //set output date to TextField value. 
+                      });
+                  }else{
+                      print("Date is not selected");
+                  }
+                },
+                                onChanged: (String s) {}),
+                            SizedBox(height: 20),
+                            ButtonTheme(
+                              height: 50.0,
+                              minWidth: 30,
+                              child: RaisedButton(
+                                color: Colors.indigo[800],
+                                elevation: 12,
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('Filter',
+                                          style: TextStyle(
+                                              color: Colors.white, fontSize: 25)),
+                                      Icon(Icons.filter_alt_outlined,
+                                          color: Colors.white, size: 20)
+                                    ]),
+                                onPressed: () {
+                                  setState(() {
+                                    isfilter = true;
+                                    fromDate = t9.text;
+                                    toDate = t10.text;
+                                    //fD = ff.parse(fromDate);
+                                   // tD = ff.parse(toDate);
+                                    myTimeStamp = Timestamp.fromDate(DateTime.parse(fromDate));
+                                    myTimeStamp1 = Timestamp.fromDate(DateTime.parse(toDate));
+
+                                    print(
+                                        '***************** ${myTimeStamp}************');
+                                    print(
+                                        '******************* ${myTimeStamp1}**********');
+                                  });
+                                },
+                              ),
+                            ),
+                            Divider(thickness: 3, color: Colors.black45),
+                            SizedBox(height: 12),
+                            ExpansionTile(
+                                title: Text(sum_transaction_title,
+                                    style: TextStyle(
+                                        fontSize: 25, color: Colors.indigo[300])),
+                                trailing: Icon(Icons.arrow_drop_down,
+                                    size: 20, color: Colors.indigo[300]),
+                                children: [
+                                  Padding(
+                                      padding: EdgeInsets.all(20),
+                                      child: Column(children: [
+                                        SizedBox(height: 5),
+                                        SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            child: customer_drop == null
+                                                ? Text('No data')
+                                                : isfilter == false
+                                                    ? StreamBuilder(
+                                                        stream: FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'Stations')
+                                                            .doc(station)
+                                                            .collection(
+                                                                'Transaction')
+                                                            .orderBy(
+                                                                'Transaction_Id',
+                                                                descending: true)
+                                                            .where('Customer_Id',
+                                                                isEqualTo:
+                                                                    customer_id)
+                                                            .snapshots(),
+                                                        builder:
+                                                            (context, snapshot) {
+                                                          return snapshot.hasData
+                                                              ? new transactiondatatable(
+                                                                  snapshot
+                                                                      .data.docs,
+                                                                  station,
+                                                                  customer_drop,
+                                                                  Customer_selected)
+                                                              : Text('No data');
+                                                        },
+                                                      )
+                                                    : StreamBuilder(
+                                                        stream: FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'Stations')
+                                                            .doc(station)
+                                                            .collection(
+                                                                'Transaction')
+                                                            // .orderBy('Transaction_Id', descending: true)
+                                                            .where('Customer_Id',
+                                                                isEqualTo:
+                                                                    customer_id)
+                                                            .where(
+                                                                'Transaction_Date',
+                                                                isGreaterThanOrEqualTo:
+                                                                    myTimeStamp)
+                                                            .where(
+                                                                'Transaction_Date',
+                                                                isLessThanOrEqualTo:
+                                                                    myTimeStamp1)
+                                                            .snapshots(),
+                                                        builder:
+                                                            (context, snapshot) {
+                                                          return snapshot.hasData
+                                                              ? new transactiondatatable(
+                                                                  snapshot
+                                                                      .data.docs,
+                                                                  station,
+                                                                  customer_drop,
+                                                                  Customer_selected)
+                                                              : Text('No data');
+                                                        },
+                                                      )),
+                                      ]))
+                                ]),
+                            SizedBox(height: 10),
+                            ExpansionTile(
+                                
+                                title: Text(sum_voucher_title,
+                                    style: TextStyle(
+                                        fontSize: 25, color: Colors.indigo[300])),
+                                trailing: Icon(Icons.arrow_drop_down,
+                                    size: 20, color: Colors.indigo[300]),
+                                children: [
+                                  Padding(
+                                      padding: EdgeInsets.all(20),
+                                      child: Column(children: [
+                                        SizedBox(height: 5),
+                                        SizedBox(height: 5),
+                                        SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
                                           child: customer_drop == null
                                               ? Text('No data')
@@ -1101,22 +1273,21 @@ class _CustomersState extends State<Customers> {
                                                   ? StreamBuilder(
                                                       stream: FirebaseFirestore
                                                           .instance
-                                                          .collection(
-                                                              'Stations')
+                                                          .collection('Stations')
                                                           .doc(station)
-                                                          .collection(
-                                                              'Transaction')
-                                                          .orderBy(
-                                                              'Transaction_Id',
-                                                              descending: true)
+                                                          .collection('Voucher')
+                                                          //.orderBy('Voucher_Id', descending: true)
                                                           .where('Customer_Id',
                                                               isEqualTo:
                                                                   customer_id)
+                                                                  .orderBy('Voucher_Id',
+                                                              descending: true)
+                                                         
                                                           .snapshots(),
                                                       builder:
                                                           (context, snapshot) {
                                                         return snapshot.hasData
-                                                            ? new transactiondatatable(
+                                                            ? new voucherdatatable(
                                                                 snapshot
                                                                     .data.docs,
                                                                 station,
@@ -1128,28 +1299,23 @@ class _CustomersState extends State<Customers> {
                                                   : StreamBuilder(
                                                       stream: FirebaseFirestore
                                                           .instance
-                                                          .collection(
-                                                              'Stations')
+                                                          .collection('Stations')
                                                           .doc(station)
-                                                          .collection(
-                                                              'Transaction')
-                                                          // .orderBy('Transaction_Id', descending: true)
+                                                          .collection('Voucher')
                                                           .where('Customer_Id',
                                                               isEqualTo:
                                                                   customer_id)
-                                                          .where(
-                                                              'Transaction_Date',
+                                                         .where('Voucher_Date',
                                                               isGreaterThanOrEqualTo:
                                                                   myTimeStamp)
-                                                          .where(
-                                                              'Transaction_Date',
+                                                          .where('Voucher_Date',
                                                               isLessThanOrEqualTo:
                                                                   myTimeStamp1)
                                                           .snapshots(),
                                                       builder:
                                                           (context, snapshot) {
                                                         return snapshot.hasData
-                                                            ? new transactiondatatable(
+                                                            ? new voucherdatatable(
                                                                 snapshot
                                                                     .data.docs,
                                                                 station,
@@ -1157,86 +1323,14 @@ class _CustomersState extends State<Customers> {
                                                                 Customer_selected)
                                                             : Text('No data');
                                                       },
-                                                    )),
-                                    ]))
-                              ]),
-                          SizedBox(height: 10),
-                          ExpansionTile(
-                              title: Text(sum_voucher_title,
-                                  style: TextStyle(
-                                      fontSize: 25, color: Colors.indigo[300])),
-                              trailing: Icon(Icons.arrow_drop_down,
-                                  size: 20, color: Colors.indigo[300]),
-                              children: [
-                                Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Column(children: [
-                                      SizedBox(height: 5),
-                                      SizedBox(height: 5),
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: customer_drop == null
-                                            ? Text('No data')
-                                            : isfilter == false
-                                                ? StreamBuilder(
-                                                    stream: FirebaseFirestore
-                                                        .instance
-                                                        .collection('Stations')
-                                                        .doc(station)
-                                                        .collection('Voucher')
-                                                        //.orderBy('Voucher_Id', descending: true)
-                                                        .where('Customer_Id',
-                                                            isEqualTo:
-                                                                customer_id)
-                                                        .where('Voucher_Date',
-                                                            isGreaterThanOrEqualTo:
-                                                                myTimeStamp)
-                                                        .where('Voucher_Date',
-                                                            isLessThanOrEqualTo:
-                                                                myTimeStamp1)
-                                                        .snapshots(),
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      return snapshot.hasData
-                                                          ? new voucherdatatable(
-                                                              snapshot
-                                                                  .data.docs,
-                                                              station,
-                                                              customer_drop,
-                                                              Customer_selected)
-                                                          : Text('No data');
-                                                    },
-                                                  )
-                                                : StreamBuilder(
-                                                    stream: FirebaseFirestore
-                                                        .instance
-                                                        .collection('Stations')
-                                                        .doc(station)
-                                                        .collection('Voucher')
-                                                        .orderBy('Voucher_Id',
-                                                            descending: true)
-                                                        .where('Customer_Id',
-                                                            isEqualTo:
-                                                                customer_id)
-                                                        .snapshots(),
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      return snapshot.hasData
-                                                          ? new voucherdatatable(
-                                                              snapshot
-                                                                  .data.docs,
-                                                              station,
-                                                              customer_drop,
-                                                              Customer_selected)
-                                                          : Text('No data');
-                                                    },
-                                                  ),
-                                      ),
-                                    ]))
-                              ]),
-                        ]))
-                  ]))
-        ]));
+                                                    ),
+                                        ),
+                                      ]))
+                                ]),
+                          ]))
+                    ]))
+          ])),
+    );
   }
 }
 
@@ -1255,6 +1349,7 @@ class transactiondatatable extends StatefulWidget {
 }
 
 class _transactiondatatableState extends State<transactiondatatable> {
+  DateFormat fff=DateFormat('yyyy-MM-dd');
   void delete_transaction(int id) async {
     print("the id is ${id} ");
     await FirebaseFirestore.instance
@@ -1304,7 +1399,9 @@ class _transactiondatatableState extends State<transactiondatatable> {
                             ),
                             DataCell(
                               Text(
-                                  '${DateTime.tryParse((transaction["Transaction_Date"]).toDate().toString())}'),
+                                  '${ fff.format(DateTime.tryParse((transaction["Transaction_Date"]).toDate().toString()))}'
+                                  
+                                  ),
                             ),
                             DataCell(
                               IconButton(
@@ -1323,6 +1420,7 @@ class _transactiondatatableState extends State<transactiondatatable> {
 }
 
 class voucherdatatable extends StatelessWidget {
+   DateFormat fff=DateFormat('yyyy-MM-dd');
   List list;
   String station;
   String customer_drop;
@@ -1372,7 +1470,7 @@ class voucherdatatable extends StatelessWidget {
                     )),
                     DataColumn(
                         label: Text(
-                      "VoucherData",
+                      "Voucher Date",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     )),
@@ -1400,7 +1498,7 @@ class voucherdatatable extends StatelessWidget {
                             ),
                             DataCell(
                               Text(
-                                  '${DateTime.tryParse((voucher["Voucher_Date"]).toDate().toString())}'),
+                                  '${fff.format( DateTime.tryParse((voucher["Voucher_Date"]).toDate().toString()))}'),
                             ),
                             DataCell(
                               Text('${voucher["Note"]}'),
