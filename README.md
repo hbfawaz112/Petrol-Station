@@ -22,7 +22,7 @@ Management system for a petrol station with all details , web version and mobile
 # Some Screenshots 
 
 ## Mobile Version 
-<img src="https://raw.githubusercontent.com/hbfawaz112/Petrol-Station/main/ScreenShots/Mobile%20ScreenShots/Petrol%20Station%20Project.png?token=AKRXMITS7FDM3CMQPVOFZ4LA6BBU2" width="70%" height="70%"/>
+<img src="https://raw.githubusercontent.com/hbfawaz112/Petrol-Station/refs/heads/main/ScreenShots/Mobile%20ScreenShots/Petrol%20Station%20Project.png" width="70%" height="70%"/>
 
 ## Web Version 
 <img src="https://raw.githubusercontent.com/hbfawaz112/Petrol-Station/refs/heads/main/ScreenShots/Web%20ScreenShots/web1.PNG" width="70%" height="70%"/>
